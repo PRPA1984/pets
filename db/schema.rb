@@ -31,7 +31,8 @@ ActiveRecord::Schema.define(version: 2021_03_14_160040) do
     t.string "name"
     t.string "login"
     t.string "password"
-    t.string "enabled"
+    t.string "token"
+    t.boolean "enabled"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

@@ -17,7 +17,7 @@ class User < ApplicationRecord
   end
 
   def add_roles(roles)
-    roles = Role.where(name: [roles].flatten)
+    roles = Role.where(name: [roles].flatten.map(&:to_s))
 
     roles.each do |role|
       next if permissions.find_by(role_id: role.id).present?

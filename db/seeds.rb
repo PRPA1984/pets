@@ -12,4 +12,4 @@ Role.create!(name: 'seller')
 
 
 user = User.create!(name: 'God', login: 'admin', password: '12345678', enabled: true)
-user.add_role(admin_role)
+user.add_roles(:admin)

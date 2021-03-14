@@ -3,7 +3,7 @@ class V1::UserController < ::ApplicationController
   def password
     if current_user.present?
       if current_user.password == params[:currentPassword]
-        current_user.update(password: params[:newPasssword])
+        current_user.update(password: params[:newPassword])
         render(status: 200)
       else
         error = {
@@ -137,23 +137,6 @@ class V1::UserController < ::ApplicationController
       error = {
         messages: [
           { path: "/v1/users/#{params[:id]}/revoke",
-            message: 'No existe el usuario'
-          }
-        ]
-      }
-
-      render(json: error, status: 401)
-    end
-  end
-
-  # GET /v1/users/current(.:format) v1/users#current {:format=>:json}
-  def current
-    if current_user.present?
-      render(json: current_user.attributes)
-    else
-      error = {
-        messages: [
-          { path: "/v1/users/current",
             message: 'No existe el usuario'
           }
         ]

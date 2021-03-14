@@ -9,6 +9,6 @@ class ApplicationController < ActionController::API
   end
 
   def authorization_token
-    request.headers["Authorization"]
+    request.headers["Authorization"].split(" ").last
   end
 end
