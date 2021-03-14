@@ -47,8 +47,8 @@ class V1::UserController < ::ApplicationController
     end
   end
 
-  # POST /v1/users/signin(.:format) v1/users#signin {:format=>:json}
-  # curl -H "Authorization: 1234" -H "Content-Type: application/json" -d '{"login": "admin", "password": "12345678"}' 127.0.0.1:3000/v1/users/signin -v
+  # POST /v1/user/signin(.:format) v1/users#signin {:format=>:json}
+  # curl -H "Content-Type: application/json" -d '{"login": "admin", "password": "12345678"}' 127.0.0.1:3000/v1/users/signin -v
   def signin
     user = User.find_by(login: user_params[:login], password: user_params[:password])
 
