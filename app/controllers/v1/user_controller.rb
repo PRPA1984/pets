@@ -1,6 +1,6 @@
 class V1::UserController < ::ApplicationController
 
-  skip_before_action :create, :signin
+  skip_before_action :verify_current_user_token, only: [:create, :signin]
 
   def password
     if current_user.password == params[:currentPassword]
