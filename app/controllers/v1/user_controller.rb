@@ -1,26 +1,16 @@
 class V1::UserController < ::ApplicationController
 
-  def password
-    if current_user.present?
-      if current_user.password == params[:currentPassword]
-        current_user.update(password: params[:newPassword])
-        render(status: 200)
-      else
-        error = {
-          messages: [
-            { path: "/v1/user/password",
-              message: 'Current password erroneo'
-            }
-          ]
-        }
+  skip_before_action :create, :signin
 
-        render(json: error, status: 401)
-      end
+  def password
+    if current_user.password == params[:currentPassword]
+      current_user.update(password: params[:newPassword])
+      render(status: 200)
     else
       error = {
         messages: [
           { path: "/v1/user/password",
-            message: 'No existe el usuario'
+            message: 'Current password erroneo'
           }
         ]
       }
@@ -29,13 +19,10 @@ class V1::UserController < ::ApplicationController
     end
   end
 
-  # GET /v1/users(.:format) v1/users#index {:format=>:json}
-  # curl -H "Authorization: 1234" -H "Content-Type: application/json" 127.0.0.1:3000/v1/users -v
   def index
     render(json: User.all, status: 200)
   end
 
-  # POST /v1/users(.:format) v1/users#create {:format=>:json}
   def create
     user = User.new(name: params[:name], login: params[:login], password: params[:password])
 
@@ -47,8 +34,6 @@ class V1::UserController < ::ApplicationController
     end
   end
 
-  # POST /v1/user/signin(.:format) v1/users#signin {:format=>:json}
-  # curl -H "Content-Type: application/json" -d '{"login": "admin", "password": "12345678"}' 127.0.0.1:3000/v1/users/signin -v
   def signin
     user = User.find_by(login: user_params[:login], password: user_params[:password])
 
@@ -60,12 +45,10 @@ class V1::UserController < ::ApplicationController
     end
   end
 
-  # GET /v1/users/signout(.:format) v1/users#signout {:format=>:json}
   def signout
     render(json: { status: 200 })
   end
 
-  # POST /v1/users/:id/disable(.:format) v1/users#disable {:format=>:json}
   def disable
     if current_user.admin?
       user = User.find_by(id: params[:id])
@@ -85,7 +68,6 @@ class V1::UserController < ::ApplicationController
     end
   end
 
-  # POST /v1/users/:id/enable(.:format) v1/users#enable {:format=>:json}
   def enable
     if current_user.admin?
       user = User.find_by(id: params[:id])
@@ -105,8 +87,6 @@ class V1::UserController < ::ApplicationController
     end
   end
 
-  # POST /v1/users/:id/grant(.:format) v1/users#grant {:format=>:json}
-  # curl -H "Authorization: 1234" -H "Content-Type: application/json" -d '{"permissions": ["admin", "user"]}' 127.0.0.1:3000/v1/users/1/grant -v
   def grant
     user = User.find_by(id: params[:id])
 
@@ -125,7 +105,6 @@ class V1::UserController < ::ApplicationController
     end
   end
 
-  # POST /v1/users/:id/revoke(.:format) v1/users#revoke {:format=>:json}
   def revoke
     user = User.find_by(id: params[:id])
 
