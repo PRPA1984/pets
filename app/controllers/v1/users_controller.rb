@@ -1,37 +1,64 @@
 class V1::UsersController < ApplicationController
+  before_action :check_token,
+    only: [
+      :index,
+      :signout,
+      :grant,
+      :current,
+      :revoke,
+      :enable,
+      :disable,
+      :password
+    ]
 
-  before_action :check_token, only: [:index, :signout, :grant]
+  before_action :verify_current_user_admin,
+    only: [
+      :index,
+      :grant,
+      :revoke,
+      :enable,
+      :disable
+    ]
 
-  def check_token
-    return if current_user.present?
-
-    render(json: format_error(request.path, 'No se quien sos'), status: 401)
-  end
+  before_action :verify_selected_client,
+    only: [
+      :grant,
+      :revoke,
+      :enable,
+      :disable
+    ]
 
   def index
-    if current_user.admin?
-      # render(json: User.all.map { |user| user.json }, status: 200)
-      render(json: User.all.map(&:json), status: 200)
-    else
-      render(json: format_error('/users', 'No sos admin'), status: 401)
-    end
+    render(json: User.all.map(&:json), status: 200)
   end
 
   def signout
     if current_user.remove_token
       render(status: 200)
     else
-      render(json: format_error('/users/signout', current_user.errors.full_messages), status: 401)
+      render(json: format_error(request.path, current_user.errors.full_messages), status: 401)
     end
   end
 
   def grant
-    if current_user.admin?
-      # TODO: Validar que los roles existan
-      params["permissions"].each { |perm| current_user.add_role(perm) }
-    else
-      render(json: format_error(request.path, 'No sos admin'), status: 401)
-    end
+    # TODO: Validar que los roles existan
+    params["permissions"].each { |perm| selected_user.add_role(perm) }
+    render(status: 200)
+  end
+
+  def revoke
+    params["permissions"].each { |perm| selected_user.remove_role(perm) }
+    render(status: 200)
+  end
+
+  def enabled
+    selected_user.update(enable: true)
+    render(status: 200)
+  end
+
+  def disable
+    selected_user.update(enable: false)
+    render(status: 200)
   end
 
   def create
@@ -40,42 +67,38 @@ class V1::UsersController < ApplicationController
     if user.save
       render(json: { token: user.token }, status: 200)
     else
-      msg = { message: [
-        {
-          path: '/v1/users',
-          message: user.errors.full_messages
-        }]
-      }
-      render(json: msg, status: 400)
+      render(json: format_error(request.path, user.errors.full_messages), status: 401)
     end
   end
 
   def signin
-    path = '/v1/users/signin'
-
     user = User.enabled.find_by(login: user_params[:login])
 
-    msg, status = if user.present? && user.valid_password?(user_params[:password])
-                    [{ token: user.token }, 200]
-                  else
-                    error = user.blank? ? 'Vieja no existe ese' : 'Vieja es cualquiera el password'
-
-                    [format_error(path, error), 400]
-                  end
-
-    render(json: msg, status: status)
+    if user.present? && user.valid_password?(user_params[:password])
+      render(json: { token: user.token }, status: 200)
+    else
+      error = user.blank? ? 'Vieja no existe ese' : 'Vieja es cualquiera el password'
+      render(json: format_error(request.path, error), status: 401)
+    end
   end
 
-  def format_error(path, message)
-    { message: [{ path: path, message: message }] }
+  def current
+    json = current_user.json
+    json.delete(:enabled)
+
+    render(json: json, status: 200)
   end
 
-  def header_token
-    request.headers["Authorization"].split(" ").last
-  end
-
-  def current_user
-    @current_user ||= User.find_by(token: header_token)
+  def password
+    if current_user.valid_password?(params["currentPassword"])
+      if current_user.update(password: params["newPassword"])
+        render(status: 200)
+      else
+        render(json: format_error(request.path, current_user.errors.full_messages), status: 401)
+      end
+    else
+      render(json: format_error(request.path, 'El currentPassword es cualquiera'), status: 401)
+    end
   end
 
   def user_params

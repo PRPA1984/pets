@@ -31,6 +31,14 @@ class User < ApplicationRecord
     Permission.create!(user: self, role: role)
   end
 
+  def remove_role(role)
+    role = Role.find_by(name: role) if role.instance_of?(String)
+
+    raise "No existe lo que pasaste" if role.blank?
+
+    permissions.where(role_id: role.id).each(&:destroy)
+  end
+
   def admin?
     role_names.include?('admin')
   end
