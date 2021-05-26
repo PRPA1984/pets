@@ -41,5 +41,13 @@ Rails.application.routes.draw do
     end
 
     resources :image, only: [:create, :show]
+
+    resources :profile, only: [:create] do
+      collection do
+        post :picture
+      end
+    end
   end
+
+  get '/v1/profile', controller: 'v1/profile', action: :show
 end

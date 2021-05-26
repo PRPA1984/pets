@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  has_one :profile
+
   has_many :permissions
   has_many :pets
 
