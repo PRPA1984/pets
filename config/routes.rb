@@ -17,8 +17,11 @@ Rails.application.routes.draw do
     resources :user, only: [] do
       collection do
         post :password
+        post :signin
+        get :signout
       end
     end
+
     resources :users, only: [:index, :create] do
       member do
         post :disable # Deshabilitar usuario
@@ -27,10 +30,16 @@ Rails.application.routes.draw do
         post :revoke
       end
       collection do
-        post :signin
-        get :signout
         get :current
       end
     end
+
+    resources :pet, except: [:update] do
+      member do
+        post :update
+      end
+    end
+
+    resources :image, only: [:create, :show]
   end
 end

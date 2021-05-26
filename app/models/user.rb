@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_many :permissions
+  has_many :pets
 
   validates :name, :login, :password, presence: true
 
@@ -9,18 +10,24 @@ class User < ApplicationRecord
 
   scope :enabled, -> { where(enabled: true) }
 
-  before_create :set_token
-
-  def set_token
-    self.token = SecureRandom.urlsafe_base64
-  end
-
   def valid_password?(pass)
     password.present? && password == pass
   end
 
-  def remove_token
-    update(token: nil)
+  def generate_token!
+    # Token persistente
+    
+    # Token con expiracion
+    # client_redis.set("session_#{user.id}", token, ex: (60 * 60))
+    token = SecureRandom.urlsafe_base64 
+
+    $client_redis.set("session_#{token}", id)
+
+    token
+  end
+
+  def remove_token(token)
+    $client_redis.del("session_#{token}")
   end
 
   def add_role(role)
@@ -49,5 +56,11 @@ class User < ApplicationRecord
 
   def json
     { id: id, name: name, login: login, enabled: enabled, permissions: role_names }
+  end
+
+  def self.find_by_token(htoken)
+    id = $client_redis.get("session_#{htoken}")
+
+    User.find_by(id: id)
   end
 end

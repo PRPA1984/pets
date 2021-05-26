@@ -29,7 +29,7 @@ class ApplicationController < ActionController::API
   end
 
   def current_user
-    @current_user ||= User.find_by(token: header_token)
+    @current_user ||= User.find_by_token(header_token)
   end
 
   def selected_user
