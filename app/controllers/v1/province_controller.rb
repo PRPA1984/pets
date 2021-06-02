@@ -7,13 +7,4 @@ class V1::ProvinceController < ApplicationController
 
     render(json: provinces, status: 200)
   end
-
-  def show
-  end
-
-  def create
-  end
-
-  def destroy
-  end
 end
