@@ -3,17 +3,21 @@ class V1::ProfileController < ApplicationController
 
   def show
     if current_user.profile.present?
+      json = current_user.profile.as_json(
+        only: [
+          :name,
+          :phone,
+          :email,
+          :address,
+          :province_id,
+          :picture
+        ]
+      )
+
+      json[:province] = current_user.profile.province_id
+
       render(
-        json: current_user.profile.as_json(
-          only: [
-            :name,
-            :phone,
-            :email,
-            :address,
-            :providence_id,
-            :picture
-          ]
-        ),
+        json: json,
         status: 200
       )
     else
@@ -41,7 +45,7 @@ class V1::ProfileController < ApplicationController
             :phone,
             :email,
             :address,
-            :providence_id,
+            :province_id,
             :picture
           ]
         ),
@@ -56,17 +60,32 @@ class V1::ProfileController < ApplicationController
   end
 
   def picture
+    if params[:image].present?
+      current_user.profile.add_picture!(params[:image])
+
+      render(
+        status: 200,
+        json: { id: current_user.profile.picture }
+      )
+    else
+      render(
+        json: format_error(request.path, "No me mandaste la imagen"),
+        status: 401
+      )
+    end
+    
   end
 
   private
 
   def profile_params
-    params.require(:profile).permit(
+    attrs = params.require(:profile).permit(
       :name,
       :phone,
       :email,
-      :address,
-      :providence
+      :address
     )
+
+    attrs.merge!(province_id: params["province"])
   end
 end

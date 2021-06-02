@@ -1,5 +1,5 @@
 class V1::ImageController < ApplicationController
-  before_action :check_token, only: [:show, :create]
+  # before_action :check_token, only: [:show, :create]
 
   def show
     image = $client_redis.get("image_#{params[:id]}")

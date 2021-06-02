@@ -7,9 +7,8 @@ class CreateProfiles < ActiveRecord::Migration[6.1]
       t.string :address
       t.string :picture
       t.boolean :enabled
-      t.references :providence
+      t.references :province
       t.references :user
-
       t.timestamps
     end
   end

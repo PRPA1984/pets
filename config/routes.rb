@@ -47,6 +47,8 @@ Rails.application.routes.draw do
         post :picture
       end
     end
+
+    resources :province, only: [:index, :create, :show, :destroy]
   end
 
   get '/v1/profile', controller: 'v1/profile', action: :show
