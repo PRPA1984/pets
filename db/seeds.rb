@@ -9,7 +9,6 @@
 role = Role.create!(name: 'admin')
 user = User.create(name: 'Foo', login: 'admin', password: 'Admin1234')
 user.add_role(role)
-Profile.create(user_id: user.id)
 
 ['Mendoza', 'Buenos Aires', "Cordoba"].each do |prov|
   Province.create!(name: prov)

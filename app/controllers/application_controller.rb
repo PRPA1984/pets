@@ -21,7 +21,7 @@ class ApplicationController < ActionController::API
   end
 
   def format_error(path, message)
-    { message: [{ path: path, message: message }] }
+    {error: message}
   end
 
   def header_token

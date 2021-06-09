@@ -4,13 +4,19 @@ class User < ApplicationRecord
   has_many :permissions
   has_many :pets
 
-  validates :name, :login, :password, presence: true
+  validates :login, :password, presence: true
 
   validates :login, uniqueness: true
 
   validates :password, length: { minimum: 7 }
 
   scope :enabled, -> { where(enabled: true) }
+
+  before_create :set_basics
+
+  def set_basics
+    self.profile = Profile.create(user_id: self.id)
+  end
 
   def valid_password?(pass)
     password.present? && password == pass

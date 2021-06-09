@@ -11,17 +11,31 @@ class V1::PetController < ApplicationController
   end
 
   def show
+    hash = current_pet.as_json(
+      only: [:id, :name, :description],
+      methods: [:birthDate]
+    )
+    hash[:profilePicture] = current_pet.get_image_by_id(current_pet.profile_picture)
+    hash[:pictures] = []
+    current_pet.pictures.each do |pic|
+      hash[:pictures] << current_pet.get_image_by_id(pic)
+    end
     render(
-      json: current_pet.as_json(
-        only: [:id, :name, :description],
-        methods: [:birthDate]
-      ),
+      json: hash,
       status: 200
     )
   end
 
   def create
     pet = current_user.pets.new(pet_params)
+
+    pet.set_profile_picture(params[:profilePicture]) if params[:profilePicture].present?
+
+    if params[:pictures].present?
+      params[:pictures].each do |pic|
+        pet.add_picture(pic)
+      end
+    end
 
     if pet.save
       render(
@@ -39,7 +53,33 @@ class V1::PetController < ApplicationController
     end
   end
 
+  def search
+    pets = Pet.where("name like ?", params[:search])
+    pets.map do |pet|
+      return {
+        "name": pet.name,
+        "description": pet.description
+      }
+    end
+    if pets.present?
+      render(json:{er: "h"}, status:200)
+    end
+  end
+
   def update
+    if params[:profilePicture].present? && params[:profilePicture].id != current_pet.profile_picture
+      current_pet.delete_picture_by_id(current_pet.profile_picture)
+      current_pet.set_profile_picture(params[:profilePicture])
+    end
+
+    if params[:pictures].present?
+      params[:pictures].each do |pic|
+        if not current_pet.pictures.includes(pic.id)
+          current_pet.add_picture(pic.src)
+        end
+      end
+    end
+
     if current_pet.update(pet_params)
       render(
         json: current_pet.as_json(
