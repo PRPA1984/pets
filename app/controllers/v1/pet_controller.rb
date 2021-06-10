@@ -36,7 +36,9 @@ class V1::PetController < ApplicationController
   def create
     pet = current_user.pets.new(pet_params)
 
-    pet.set_profile_picture(params[:profilePicture][:src]) if params[:profilePicture][:src].present?
+    if params[:profilePicture].present?
+      pet.set_profile_picture(params[:profilePicture][:src]) 
+    end
 
     if params[:pictures].present?
       params[:pictures].each do |pic|
@@ -78,16 +80,15 @@ class V1::PetController < ApplicationController
 
   def update
 
-    if params[:profilePicture].present? && params[:profilePicture][:id] != current_pet.profile_picture
+    if current_pet.profile_picture.blank? && params[:profilePicture].present?
+      current_pet.set_profile_picture(params[:profilePicture][:src])
+    elsif params[:profilePicture].present? && params[:profilePicture][:id] != current_pet.profile_picture
       current_pet.delete_picture_by_id(current_pet.profile_picture)
       current_pet.set_profile_picture(params[:profilePicture][:src])
     end
 
     if params[:pictures].present?
       pics_ids = params[:pictures].map do |pic|
-        if pic[:id].blank?
-          current_pet.add_picture(pic[:src])
-        end
         pic[:id]
       end
 
@@ -96,6 +97,17 @@ class V1::PetController < ApplicationController
           current_pet.delete_picture_by_id(pic.image_id)
           current_pet.pictures.delete(pic)
         end
+      end
+
+      params[:pictures].each do |pic|
+        if pic[:id].blank?
+          current_pet.add_picture(pic[:src])
+        end
+      end
+    else
+      current_pet.pictures.each do |pic|
+        current_pet.delete_picture_by_id(pic.image_id)
+        current_pet.pictures.delete(pic)
       end
     end
     current_pet.name = pet_params[:name]
