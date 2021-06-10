@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 2021_06_09_184502) do
   create_table "pictures", force: :cascade do |t|
     t.string "imageable_type"
     t.integer "imageable_id"
+    t.string "image_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["imageable_type", "imageable_id"], name: "index_pictures_on_imageable"

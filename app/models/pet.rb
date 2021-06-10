@@ -22,7 +22,10 @@ class Pet < ApplicationRecord
     picture_id = SecureRandom.uuid
 
     $client_redis.set("image_#{picture_id}", image)
-    self.pictures << picture_id
+
+    picture = Picture.new
+    picture.image_id = picture_id
+    self.pictures << picture
   end
   
   def delete_picture_by_id(id)

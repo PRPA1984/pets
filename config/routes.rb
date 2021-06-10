@@ -38,6 +38,9 @@ Rails.application.routes.draw do
       member do
         post :update
       end
+      collection do
+        get :search
+      end
     end
 
     resources :image, only: [:create, :show]
