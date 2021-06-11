@@ -8,7 +8,7 @@ class CreatePets < ActiveRecord::Migration[6.1]
 
       t.datetime :birth_date
 
-      t.boolean :visibility, default: true
+      t.boolean :visibility, default: false
       t.boolean :enable, default: true
 
       t.timestamps

@@ -26,7 +26,6 @@ class V1::PetController < ApplicationController
         id: pic.image_id
       }
     end
-    puts(hash)
     render(
       json: hash,
       status: 200
@@ -64,27 +63,32 @@ class V1::PetController < ApplicationController
 
   def search
     pets = Pet.where("name like ?","%#{params[:search]}%").where(visibility: true)
-    pets = pets.map do |pet|
-      {
-        "id": pet.id,
-        "name": pet.name,
-        "description": pet.description,
-        "profilePicture": {
-          "src": pet.get_image_by_id(pet.profile_picture),
-          "id": pet.profile_picture
+    if pets.present?
+      pets = pets.map do |pet|
+        {
+          "id": pet.id,
+          "name": pet.name,
+          "description": pet.description,
+          "profilePicture": {
+            "src": pet.get_image_by_id(pet.profile_picture),
+            "id": pet.profile_picture
+          }
         }
-      }
+      end
+      render(json: pets, status:200)
+    else
+      render(json: {"error": "Pets not found"}, status:400)
     end
-    render(json: pets, status:200)
   end
 
   def update
-
-    if current_pet.profile_picture.blank? && params[:profilePicture].present?
-      current_pet.set_profile_picture(params[:profilePicture][:src])
-    elsif params[:profilePicture].present? && params[:profilePicture][:id] != current_pet.profile_picture
-      current_pet.delete_picture_by_id(current_pet.profile_picture)
-      current_pet.set_profile_picture(params[:profilePicture][:src])
+    if params[:profilePicture].present? 
+      if current_pet.profile_picture.blank?
+        current_pet.set_profile_picture(params[:profilePicture][:src])
+      elsif params[:profilePicture][:id] != current_pet.profile_picture
+        current_pet.delete_picture_by_id(current_pet.profile_picture)
+        current_pet.set_profile_picture(params[:profilePicture][:src])
+      end     
     end
 
     if params[:pictures].present?
