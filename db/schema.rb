@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(version: 2021_06_09_184502) do
     t.string "description"
     t.string "profile_picture"
     t.datetime "birth_date"
+    t.boolean "visibility", default: true
     t.boolean "enable", default: true
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false

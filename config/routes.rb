@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     resources :pet, except: [:update] do
       member do
         post :update
+        post :changePrivacy
       end
       collection do
         get :search

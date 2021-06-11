@@ -4,7 +4,7 @@ class V1::PetController < ApplicationController
 
   def index
     pets = current_user.pets.as_json(
-      only: [:id, :name, :description],
+      only: [:id, :name, :description, :visibility],
       methods: [:birthDate]
     )
     render(json: pets, status: 200)
@@ -63,7 +63,7 @@ class V1::PetController < ApplicationController
   end
 
   def search
-    pets = Pet.where("name like ?","%#{params[:search]}%")
+    pets = Pet.where("name like ?","%#{params[:search]}%").where(visibility: true)
     pets = pets.map do |pet|
       {
         "id": pet.id,
@@ -137,6 +137,17 @@ class V1::PetController < ApplicationController
         json: format_error(request.path, current_pet.errors.full_messages),
         status: 401
       )
+    end
+  end
+
+  def changePrivacy
+    pet = Pet.find_by(id: params[:id])
+    if pet.present?
+      pet.visibility = !pet.visibility
+      pet.save
+      render(status: 200)
+    else
+      render(json: {"error": "Pet not found"}, status:400)
     end
   end
 
