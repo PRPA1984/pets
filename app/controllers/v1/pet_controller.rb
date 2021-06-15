@@ -91,27 +91,20 @@ class V1::PetController < ApplicationController
       end     
     end
 
-    if params[:pictures].present?
-      pics_ids = params[:pictures].map do |pic|
-        pic[:id]
-      end
+    pics_ids = params[:pictures].map do |pic|
+      pic[:id]
+    end
 
-      current_pet.pictures.each do |pic|
-        if not pics_ids.include?(pic.image_id)
-          current_pet.delete_picture_by_id(pic.image_id)
-          current_pet.pictures.delete(pic)
-        end
-      end
-
-      params[:pictures].each do |pic|
-        if pic[:id].blank?
-          current_pet.add_picture(pic[:src])
-        end
-      end
-    else
-      current_pet.pictures.each do |pic|
+    current_pet.pictures.each do |pic|
+      if not pics_ids.include?(pic.image_id)
         current_pet.delete_picture_by_id(pic.image_id)
         current_pet.pictures.delete(pic)
+      end
+    end
+
+    params[:pictures].each do |pic|
+      if pic[:id].blank?
+        current_pet.add_picture(pic[:src])
       end
     end
     current_pet.name = pet_params[:name]
